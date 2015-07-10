@@ -28,11 +28,11 @@
 
 package ws.raidrush.shunt;
 
-public class Number extends Token
+public class RNumber extends Token
 {
 	public double value;
 	
-	public Number(double value, short type)
+	public RNumber(double value, short type)
 	{
 		this.value = value;
 		this.type  = type;

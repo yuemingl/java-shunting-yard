@@ -84,19 +84,19 @@ public class Scanner
 			
 			// decimal
 			if (re_decimal.matcher(token).matches()) {
-				tokens.push(prev = new Number(Double.parseDouble(token), Token.T_NUMBER));
+				tokens.push(prev = new RNumber(Double.parseDouble(token), Token.T_NUMBER));
 				continue;
 			}
 			
 			// binary
 			if (re_binary.matcher(token).matches()) {
-			  tokens.push(prev = new Number((double) Long.parseLong(token.substring(2), 2), Token.T_NUMBER));
+			  tokens.push(prev = new RNumber((double) Long.parseLong(token.substring(2), 2), Token.T_NUMBER));
 			  continue;
 			}
 			
 			// hex
 			if (re_hex.matcher(token).matches()) {
-			  tokens.push(prev = new Number((double) Long.parseLong(token.substring(2), 16), Token.T_NUMBER));
+			  tokens.push(prev = new RNumber((double) Long.parseLong(token.substring(2), 16), Token.T_NUMBER));
 			  continue;
 			}
 			

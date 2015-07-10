@@ -129,7 +129,7 @@ public class Parser
               ++opn;
             } else {
               opcode.append("NOOP\n");
-              stack.add("" + ((Number) t).value);
+              stack.add("" + ((RNumber) t).value);
             }
               
             ++len;
@@ -290,9 +290,9 @@ public class Parser
 	      .append("\"").toString();
 	}
 	
-	public Symbol reduce(Context ctx) throws RuntimeError
+	public RSymbol reduce(Context ctx) throws RuntimeError
 	{
-	  Symbol res = null;
+	  RSymbol res = null;
 	  
 	  for (TokenStack ts : queue) {
 	    if (ts.size() == 0)
@@ -301,7 +301,7 @@ public class Parser
   	  int len = 0;
       
       Token t;
-      Stack<Symbol> stack = new Stack<Symbol>();
+      Stack<RSymbol> stack = new Stack<RSymbol>();
       
   		// While there are input tokens left
   		// Read the next token from input.
@@ -311,11 +311,11 @@ public class Parser
   				case Token.T_IDENT:
   				case Token.T_RIDENT:
   				case Token.T_STRING: {
-  				  Symbol sym = null;
+  				  RSymbol sym = null;
   				  
   				  switch (t.type) {
   				    case Token.T_NUMBER:
-  				      sym = new Symbol(((Number) t).value);
+  				      sym = new RSymbol(((RNumber) t).value);
   				      break;
   				      
   				    case Token.T_RIDENT:
@@ -326,7 +326,7 @@ public class Parser
     				      sym = ctx.getSymbol(name);
   				      } catch (RuntimeError e) {
   				        // create symbol
-  				        ctx.setSymbol(name, sym = new Symbol("", true));
+  				        ctx.setSymbol(name, sym = new RSymbol("", true));
   				      }
   				      
   				      if (sym.readonly == true)
@@ -340,7 +340,7 @@ public class Parser
   				      break;
   				      
   				    case Token.T_STRING:
-  				      sym = new Symbol(((Ident) t).value, false);
+  				      sym = new RSymbol(((Ident) t).value, false);
   				      break;
   				  }
   				  
@@ -366,8 +366,8 @@ public class Parser
   					if (len < na)
   						throw new RuntimeError("zu wenig token f�r operator `" + ((Operator) t).value + "`");
   					
-  					Symbol rhs = stack.pop();
-  					Symbol lhs = null;
+  					RSymbol rhs = stack.pop();
+  					RSymbol lhs = null;
   								          
   					if (na > 1) lhs = stack.pop();
   								           
@@ -380,7 +380,7 @@ public class Parser
   				
   				case Token.T_FUNCTION: {
   					int      argc = ((Ident) t).argc;
-  					Symbol[] argv = new Symbol[argc];
+  					RSymbol[] argv = new RSymbol[argc];
   					
   					len -= (argc - 1);
   					
@@ -413,38 +413,38 @@ public class Parser
 	  return res;
 	}
 	
-	protected Symbol doOp(short type, Symbol lhs, Symbol rhs) throws RuntimeError
+	protected RSymbol doOp(short type, RSymbol lhs, RSymbol rhs) throws RuntimeError
 	{
 		if (lhs != null) {
 		  if (type == Token.T_ASSIGN) {
 		    if (lhs.ident != true)
 		      throw new RuntimeError("nur identifer k�nnen werte speichern");
 		    
-		    if (rhs.type == Symbol.IS_NUMBER) {
+		    if (rhs.type == RSymbol.IS_NUMBER) {
 		      lhs.num = rhs.num;
-		      lhs.type = Symbol.IS_NUMBER;
+		      lhs.type = RSymbol.IS_NUMBER;
 		    } else {
 		      lhs.str = rhs.str;
-		      lhs.type = Symbol.IS_STRING;
+		      lhs.type = RSymbol.IS_STRING;
 		    }
 		    
 		    return lhs;
 		  }
 		  
-		  boolean lin = lhs.type == Symbol.IS_NUMBER,
-		          rin = rhs.type == Symbol.IS_NUMBER;
+		  boolean lin = lhs.type == RSymbol.IS_NUMBER,
+		          rin = rhs.type == RSymbol.IS_NUMBER;
 		  
 			switch (type) {
 				case Token.T_PLUS: {
 				  if (lin && rin)
-				    return new Symbol(lhs.num + rhs.num);
+				    return new RSymbol(lhs.num + rhs.num);
 				  
 				  StringBuilder sb = new StringBuilder();
 				  
 				  sb.append(lin ? lhs.num : lhs.str)
 				    .append(rin ? rhs.num : rhs.str);
 				  
-				  return new Symbol(sb.toString(), false);
+				  return new RSymbol(sb.toString(), false);
 				}
 				
 				case Token.T_MINUS: {
@@ -456,13 +456,13 @@ public class Parser
 				    else 
 				      val = val.replace(rhs.str, "");
 				    
-				    return new Symbol(val, false);
+				    return new RSymbol(val, false);
 				  }
 				  
 				  if (!rin)
 				    throw new RuntimeError("undefinierter operator `-` f�r NUMBER und STRING");
 				  
-					return new Symbol(lhs.num - rhs.num);
+					return new RSymbol(lhs.num - rhs.num);
 				}
 				
 				case Token.T_TIMES: {
@@ -473,10 +473,10 @@ public class Parser
 				    for (int i = 0, l = (int) (lin ? lhs.num : rhs.num); i < l; ++i)
 				      sb.append(val);
 				    
-				    return new Symbol(sb.toString(), false);
+				    return new RSymbol(sb.toString(), false);
 				  }
 				  
-					return new Symbol(lhs.num * rhs.num);
+					return new RSymbol(lhs.num * rhs.num);
 				}
 				
 				case Token.T_DIV:
@@ -486,7 +486,7 @@ public class Parser
 					if (rhs.num == 0.)
 						throw new RuntimeError("teilung durch 0");
 					
-					return new Symbol(lhs.num / rhs.num);
+					return new RSymbol(lhs.num / rhs.num);
 				
 				case Token.T_MOD:
 				  if (!lin || rin)
@@ -495,13 +495,13 @@ public class Parser
 					if (rhs.num == 0.)
 						throw new RuntimeError("rest-teilung durch 0");
 					
-					return new Symbol((double) (lhs.num % rhs.num));
+					return new RSymbol((double) (lhs.num % rhs.num));
 
 				case Token.T_POW:
 				  if (!lin || rin)
             throw new RuntimeError("undefinierter operator `%` f�r STRING");
 				  
-					return new Symbol(Math.pow(lhs.num, rhs.num));
+					return new RSymbol(Math.pow(lhs.num, rhs.num));
 			}
 
 			// throw?
@@ -509,30 +509,30 @@ public class Parser
 			return null;
 		}
 
-		boolean rin = rhs.type == Symbol.IS_NUMBER;
+		boolean rin = rhs.type == RSymbol.IS_NUMBER;
 		
 		switch (type) {
 			case Token.T_NOT:
-			  if (rin) return new Symbol(rhs.num > 0. ? 0. : 1.);
-			  return new Symbol(rhs.str.isEmpty() ? 1. : 0.);
+			  if (rin) return new RSymbol(rhs.num > 0. ? 0. : 1.);
+			  return new RSymbol(rhs.str.isEmpty() ? 1. : 0.);
 
 			case Token.T_UNARY_MINUS: {
-			  if (rin) return new Symbol(-rhs.num);
+			  if (rin) return new RSymbol(-rhs.num);
 			  
 			  try {
-			    return new Symbol(-Double.parseDouble(rhs.str));
+			    return new RSymbol(-Double.parseDouble(rhs.str));
 			  } catch (NumberFormatException e) {
-			    return new Symbol(0);
+			    return new RSymbol(0);
 			  }
 			}
 			
 			case Token.T_UNARY_PLUS: {
-			  if (rin) return new Symbol(+rhs.num);
+			  if (rin) return new RSymbol(+rhs.num);
 			  
 			  try {
-			    return new Symbol(+Double.parseDouble(rhs.str));
+			    return new RSymbol(+Double.parseDouble(rhs.str));
 			  } catch (NumberFormatException e) {
-          return new Symbol(0);
+          return new RSymbol(0);
         }
 			}
 		}
@@ -765,12 +765,12 @@ public class Parser
 		return 0;
 	}
 	
-	public static Symbol parse(String term) throws SyntaxError, ParseError, RuntimeError
+	public static RSymbol parse(String term) throws SyntaxError, ParseError, RuntimeError
 	{
 		return Parser.parse(term, new Context());
 	}
 	
-	public static Symbol parse(String term, Context ctx) throws SyntaxError, ParseError, RuntimeError
+	public static RSymbol parse(String term, Context ctx) throws SyntaxError, ParseError, RuntimeError
 	{
 	  return new Parser(new Scanner(term)).reduce(ctx);
 	}

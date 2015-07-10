@@ -34,17 +34,20 @@ import java.util.HashMap;
 public class Context 
 {
 	protected Map<String, Function> functionTable;
-	protected Map<String, Symbol>   constantTable;
-	protected Map<String, Symbol>   symbolTable;
+	protected Map<String, RSymbol>   constantTable;
+	protected Map<String, RSymbol>   symbolTable;
 	
 	public Context()
 	{
 		functionTable = new HashMap<String, Function>();
-		constantTable = new HashMap<String, Symbol>();
-		symbolTable   = new HashMap<String, Symbol>();
+		constantTable = new HashMap<String, RSymbol>();
+		symbolTable   = new HashMap<String, RSymbol>();
 		
 		// define PI
-		constantTable.put("PI", new Symbol(Math.PI, true));
+		//NOT Work?
+//		constantTable.put("pi", new RSymbol(Math.PI, true));
+//		constantTable.put("PI", new RSymbol(Math.PI, true));
+//		constantTable.put("e", new RSymbol(Math.E));
 	}
 	
 	public Function getFunction(String name) throws RuntimeError
@@ -55,7 +58,7 @@ public class Context
 		return functionTable.get(name);
 	}
 	
-	public Symbol getConstant(String name) throws RuntimeError
+	public RSymbol getConstant(String name) throws RuntimeError
 	{
 		if (!constantTable.containsKey(name))
 			throw new RuntimeError("undefinierte konstante \"" + name + "\"");
@@ -63,7 +66,7 @@ public class Context
 		return constantTable.get(name);
 	}
 	
-	public Symbol getSymbol(String name) throws RuntimeError 
+	public RSymbol getSymbol(String name) throws RuntimeError 
   {
     if (!symbolTable.containsKey(name))
       throw new RuntimeError("undefiniertes symbol \"" + name + "\"");
@@ -71,7 +74,7 @@ public class Context
     return symbolTable.get(name);
   }
 	
-	public Context setConstant(String name, Symbol value)
+	public Context setConstant(String name, RSymbol value)
 	{
 	  value.readonly = true;
 	  return setSymbol(name, value);
@@ -83,7 +86,7 @@ public class Context
 		return this;
 	}
 	
-	public Context setSymbol(String name, Symbol value)
+	public Context setSymbol(String name, RSymbol value)
 	{
 	  symbolTable.put(name, value);
 	  return this;

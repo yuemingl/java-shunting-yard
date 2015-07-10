@@ -30,5 +30,5 @@ package ws.raidrush.shunt;
 
 public interface Function 
 {
-	public Symbol call(Symbol[] args);
+	public RSymbol call(RSymbol[] args);
 }
