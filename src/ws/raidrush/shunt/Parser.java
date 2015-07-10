@@ -152,7 +152,7 @@ public class Parser
             
             // If there are fewer than n values on the stack
             if (len < na)
-              throw new RuntimeError("zu wenig token für operator `" + ((Operator) t).value + "`");
+              throw new RuntimeError("zu wenig token fï¿½r operator `" + ((Operator) t).value + "`");
             
             String rhs = stack.lastElement();
             String lhs = null;
@@ -330,7 +330,7 @@ public class Parser
   				      }
   				      
   				      if (sym.readonly == true)
-                  throw new RuntimeError("symbol \"" + name + "\" kann nicht überschrieben werden");
+                  throw new RuntimeError("symbol \"" + name + "\" kann nicht ï¿½berschrieben werden");
   				      
   				      break;
   				      
@@ -364,7 +364,7 @@ public class Parser
   					
   					// If there are fewer than n values on the stack
   					if (len < na)
-  						throw new RuntimeError("zu wenig token für operator `" + ((Operator) t).value + "`");
+  						throw new RuntimeError("zu wenig token fï¿½r operator `" + ((Operator) t).value + "`");
   					
   					Symbol rhs = stack.pop();
   					Symbol lhs = null;
@@ -418,7 +418,7 @@ public class Parser
 		if (lhs != null) {
 		  if (type == Token.T_ASSIGN) {
 		    if (lhs.ident != true)
-		      throw new RuntimeError("nur identifer können werte speichern");
+		      throw new RuntimeError("nur identifer kï¿½nnen werte speichern");
 		    
 		    if (rhs.type == Symbol.IS_NUMBER) {
 		      lhs.num = rhs.num;
@@ -460,7 +460,7 @@ public class Parser
 				  }
 				  
 				  if (!rin)
-				    throw new RuntimeError("undefinierter operator `-` für NUMBER und STRING");
+				    throw new RuntimeError("undefinierter operator `-` fï¿½r NUMBER und STRING");
 				  
 					return new Symbol(lhs.num - rhs.num);
 				}
@@ -481,7 +481,7 @@ public class Parser
 				
 				case Token.T_DIV:
 				  if (!lin || !rin)
-				    throw new RuntimeError("undefinierter operator `/` für STRING");
+				    throw new RuntimeError("undefinierter operator `/` fï¿½r STRING");
 				  
 					if (rhs.num == 0.)
 						throw new RuntimeError("teilung durch 0");
@@ -490,7 +490,7 @@ public class Parser
 				
 				case Token.T_MOD:
 				  if (!lin || rin)
-				    throw new RuntimeError("undefinierter operator `%` für STRING");
+				    throw new RuntimeError("undefinierter operator `%` fï¿½r STRING");
 				  
 					if (rhs.num == 0.)
 						throw new RuntimeError("rest-teilung durch 0");
@@ -499,7 +499,7 @@ public class Parser
 
 				case Token.T_POW:
 				  if (!lin || rin)
-            throw new RuntimeError("undefinierter operator `%` für STRING");
+            throw new RuntimeError("undefinierter operator `%` fï¿½r STRING");
 				  
 					return new Symbol(Math.pow(lhs.num, rhs.num));
 			}
@@ -778,5 +778,9 @@ public class Parser
 	public static String generateOpcode(String term) throws RuntimeError, ParseError, SyntaxError
 	{
 	  return new Parser(new Scanner(term)).opcode();
+	}
+	
+	public Stack<TokenStack> getTokenStacks () {
+		return this.queue;
 	}
 }

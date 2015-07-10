@@ -37,4 +37,8 @@ public class Number extends Token
 		this.value = value;
 		this.type  = type;
 	}
+	
+	public String toString() {
+		return String.valueOf(value);
+	}
 }

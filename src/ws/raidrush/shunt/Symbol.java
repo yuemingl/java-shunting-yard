@@ -49,4 +49,12 @@ public class Symbol
     this(num, ident);
     this.readonly = readonly;
   }
+  
+  public String toString() {
+	  if(this.type == IS_STRING) {
+		  return this.str;
+	  } else {
+		  return String.valueOf(this.num);
+	  }
+  }
 }

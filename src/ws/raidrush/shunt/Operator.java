@@ -37,4 +37,8 @@ public class Operator extends Token
 		this.value = value;
 		this.type  = type;
 	}
+	
+	public String toString() {
+		return value;
+	}
 }

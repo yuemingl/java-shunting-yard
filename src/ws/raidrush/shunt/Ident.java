@@ -38,4 +38,8 @@ public class Ident extends Token
 		this.value = value;
 		this.type  = type;
 	}
+	
+	public String toString() {
+		return value;
+	}
 }
