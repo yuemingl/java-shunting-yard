@@ -50,9 +50,9 @@ public class Test {
 	}
 	public static void main(String[] args) {
 		//Test();
-		Expr expr = parse("e",new String[]{"x","y"});
-		//Expr expr = parse("1-(x+sin(x))^2",new String[]{"x","y"});
-		//Expr expr = parse("1-(x+integrate(2*y,interval(y,0,1,100)))^(2+x)",new String[]{"x","y"});
+		Expr expr = parse("e");
+		//Expr expr = parse("1-(x+sin(x))^2");
+		//Expr expr = parse("1-(x+integrate(2*y,interval(y,0,1,100)))^(2+x)");
 		System.out.println(expr);
 		System.out.println(expr.diff(new symjava.symbolic.Symbol("x")));
 		
@@ -60,7 +60,7 @@ public class Test {
 		System.out.println(res);
 		
 		String strRes = res.toString();
-		Expr exprRes = parse(strRes,new String[]{"x","y"});
+		Expr exprRes = parse(strRes);
 		System.out.println(exprRes);
 		
 		
@@ -74,10 +74,17 @@ public class Test {
 		Expr[] freeVars = {vol};
 		Expr[] params = {spot, strike, rd, rf, tau, phi};
 		Eq[] eq = new Eq[] { new Eq(exprRes-0.897865, C0, freeVars, params) };
+
+		System.out.println(">>>"+eq[0].toString());
+		Expr exprEq = parse(eq[0].toString());
+		System.out.println(">>>"+exprEq);
+
 		// Use Newton's method to find the root
 		double[] guess = new double[]{ 0.10 };
 		double[] constParams = new double[] {100.0, 110.0, 0.002, 0.01, 0.5, 1};
-		Newton.solve(eq, guess, constParams, 100, 1e-5);		
+		Newton.solve(eq, guess, constParams, 100, 1e-5);
+		
+		Newton.solve(new Expr[]{exprEq}, guess, constParams, 100, 1e-5);
 	}
 
 	public static Expr getBlackScholes() {
@@ -142,11 +149,9 @@ public class Test {
 		}
 	}
 	
-	public static Expr parse(String expr, String[] args) {
+	public static Expr parse(String expr) {
 		try {
 			Context ctx = new Context();
-			for(int i=0; i<args.length; i++)
-				ctx.setConstant(args[i], new RSymbol());
 			
 			//See class Context for pi, e
 			
@@ -163,6 +168,8 @@ public class Test {
 			ctx.setFunction("integrate", new DummyFunction());
 			ctx.setFunction("domain", new DummyFunction());
 			ctx.setFunction("interval", new DummyFunction());
+			ctx.setFunction("eq", new DummyFunction());
+			ctx.setFunction("array", new DummyFunction());
 			
 			Parser p = new Parser(new Scanner(expr));
 			//System.out.println(p.opcode()); //This will clear the stack
@@ -221,6 +228,21 @@ public class Test {
 										setStepSize(coordVar, step.getDoubleValue());
 								symStack.push(new ExprHolder(domain)); 
 								}
+							else if(n.value.equalsIgnoreCase("eq")) {
+								ExprHolder paramsHoleder = (ExprHolder)symStack.pop();
+								ExprHolder freeVarsHolder = (ExprHolder)symStack.pop();
+								r = symStack.pop();
+								l = symStack.pop();
+								Eq eq = new Eq(l,r,(Expr[])(freeVarsHolder.obj), (Expr[])(paramsHoleder.obj));
+								symStack.push(eq); 
+								}
+							else if(n.value.equalsIgnoreCase("array")) {
+								Expr[] exprAry = new Expr[n.argc];
+								for(int i=0; i<n.argc; i++) {
+									exprAry[n.argc-i-1] = symStack.pop();
+								}
+								symStack.push(new ExprHolder(exprAry)); 
+							}
 							break;
 						case Token.T_POPEN:      // (
 							break;
