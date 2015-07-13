@@ -13,7 +13,6 @@ import static symjava.math.SymMath.tan;
 import java.util.HashMap;
 import java.util.Stack;
 
-import lc.bytecode.ShuntingYardParser.ExprHolder;
 import symjava.domains.Domain;
 import symjava.domains.Interval;
 import symjava.math.SymMath;

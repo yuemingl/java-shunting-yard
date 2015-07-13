@@ -23,10 +23,11 @@ public class Test2 {
 			ShuntingYardParser parser = new ShuntingYardParser();
 			//Expr expr = parser.parse("z=x+y; t=z^2+z+1; diff(sin(t),x)");
 			//Expr expr = parser.parse("y=x^2+2*x+1; dy=diff(y,x); sin(dy)");
-			Expr expr = parser.parse("eq(y,a/(b + x)*x,array(x),array(a,b))");
+			//Expr expr = parser.parse("eq(y,a/(b + x)*x,array(x),array(a,b))");
+			Expr expr = parser.parse("cos(x+y)");
 			
 			System.out.println(expr);
-			//System.out.println(expr.diff(Symbol.x));
+			System.out.println(expr.diff(Symbol.x));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
