@@ -132,7 +132,7 @@ public class Parser {
 						++opn;
 					} else {
 						opcode.append("NOOP\n");
-						stack.add("" + ((RNumber) t).value);
+						stack.add("" + ((RDouble) t).value);
 					}
 
 					++len;
@@ -322,7 +322,7 @@ public class Parser {
 
 					switch (t.type) {
 					case Token.T_NUMBER:
-						sym = new RSymbol(((RNumber) t).value);
+						sym = new RSymbol(((RDouble) t).value);
 						break;
 
 					case Token.T_RIDENT:
@@ -590,7 +590,7 @@ public class Parser {
 				
 //lym bufgix for case: fun1(x,(y+z)*x)
 				if (next.type == Token.T_PCLOSE && cstack.last().type == Token.T_FUNCTION) {
-					cqueue.push(cstack.pop());
+					cqueue.push(cstack.pop()); //pop function name and put it in the queue
 					break;
 				}
 

@@ -34,16 +34,20 @@ import java.util.regex.Matcher;
 public class Scanner 
 {	
 	public static final String 
-		RE_PATTERN = "^([\\+\\-\\*\\/%\\^]=|[\"'!,\\+\\-\\*\\/\\^%\\(\\)=;]|0x[a-fA-f0-9]+|0b[10]+|\\d*\\.\\d+|\\d+\\.\\d*|\\d+|[a-z_A-Zπ]+[a-z_A-Z0-9]*|[ \\t]+).*",
+		RE_PATTERN = "^([\\+\\-\\*\\/%\\^]=|[\"'!,\\+\\-\\*\\/\\^%\\(\\)=;]|0x[a-fA-f0-9]+|0b[10]+|\\d*\\.\\d+|\\d+\\.\\d*|\\d+|[a-z_A-Zπ]+[a-z_A-Z0-9.]*|[ \\t]+).*",
 		RE_DECIMAL = "^\\d*\\.\\d+|\\d+\\.\\d*|\\d+$",
 		RE_BINARY  = "^0b[10]+$",
 		RE_HEX     = "^0x[a-fA-f0-9]+$",
-		RE_IDENT   = "^[a-z_A-Zπ]+[a-z_A-Z0-9]*$";
+		RE_IDENT   = "^[a-z_A-Zπ]+[a-z_A-Z0-9.]*$";
 	
 	protected TokenStack tokens;
 	
 	public Scanner(String term) throws SyntaxError
-	{		
+	{
+		//support [1,2,3] or [[1,2],3,4]
+		term = term.replaceAll("\\[", "array(").replaceAll("\\]", ")");
+		//System.out.println(term);
+		
 		tokens = new TokenStack();
 		
 		Pattern re_pattern = Pattern.compile(RE_PATTERN),
@@ -84,19 +88,22 @@ public class Scanner
 			
 			// decimal
 			if (re_decimal.matcher(token).matches()) {
-				tokens.push(prev = new RNumber(Double.parseDouble(token), Token.T_NUMBER));
+				if(isInteger(token))
+					tokens.push(prev = new RInteger(Integer.parseInt(token), Token.T_NUMBER));
+				else
+					tokens.push(prev = new RDouble(Double.parseDouble(token), Token.T_NUMBER));
 				continue;
 			}
 			
 			// binary
 			if (re_binary.matcher(token).matches()) {
-			  tokens.push(prev = new RNumber((double) Long.parseLong(token.substring(2), 2), Token.T_NUMBER));
+			  tokens.push(prev = new RDouble((double) Long.parseLong(token.substring(2), 2), Token.T_NUMBER));
 			  continue;
 			}
 			
 			// hex
 			if (re_hex.matcher(token).matches()) {
-			  tokens.push(prev = new RNumber((double) Long.parseLong(token.substring(2), 16), Token.T_NUMBER));
+			  tokens.push(prev = new RDouble((double) Long.parseLong(token.substring(2), 16), Token.T_NUMBER));
 			  continue;
 			}
 			
@@ -277,6 +284,22 @@ public class Scanner
     tokens.push(next);
     
     return next;
+	}
+	
+	public static boolean isInteger(String s) {
+	    return isInteger(s,10);
+	}
+
+	public static boolean isInteger(String s, int radix) {
+	    if(s.isEmpty()) return false;
+	    for(int i = 0; i < s.length(); i++) {
+	        if(i == 0 && s.charAt(i) == '-') {
+	            if(s.length() == 1) return false;
+	            else continue;
+	        }
+	        if(Character.digit(s.charAt(i),radix) < 0) return false;
+	    }
+	    return true;
 	}
 	
 	public Token next() { return this.tokens.next(); }

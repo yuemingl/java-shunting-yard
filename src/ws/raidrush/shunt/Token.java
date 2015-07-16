@@ -38,6 +38,8 @@ public class Token
 		T_PCLOSE       = 5,   // )
 		T_RIDENT       = 8,   // ident vor = (R -> right)
 		T_STRING       = 9,   // string
+//		T_BOPEN        = 10,  // [
+//		T_BCLOSE       = 11,  // ]
 		T_OPERATOR     = 128, // operator
 		T_PLUS         = 129, // +
 		T_MINUS        = 130, // -
@@ -45,8 +47,8 @@ public class Token
 		T_DIV          = 132, // /
 		T_MOD          = 133, // %
 		T_POW          = 134, // ^
-		T_UNARY_PLUS   = 135, // + als vorzeichen (zur übersetzungszeit ermittelt)
-		T_UNARY_MINUS  = 136, // - als vorzeichen (zur übersetzungszeit ermittelt)
+		T_UNARY_PLUS   = 135, // + als vorzeichen (zur ï¿½bersetzungszeit ermittelt)
+		T_UNARY_MINUS  = 136, // - als vorzeichen (zur ï¿½bersetzungszeit ermittelt)
 		T_NOT          = 137, // ! als vorzeichen
 		T_SEMI         = 138, // ;
 		T_COMMA        = 139, // ,
