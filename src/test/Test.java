@@ -22,6 +22,7 @@ public class Test {
 		Expr expr = parser.parse("e");
 		//Expr expr = parse("1-(x+sin(x))^2");
 		//Expr expr = parse("1-(x+integrate(2*y,interval(y,0,1,100)))^(2+x)");
+
 		System.out.println(expr);
 		System.out.println(expr.diff(new symjava.symbolic.Symbol("x")));
 		
