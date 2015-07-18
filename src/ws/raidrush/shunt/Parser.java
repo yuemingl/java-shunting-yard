@@ -658,6 +658,7 @@ public class Parser {
 		case Token.T_MOD:
 		case Token.T_POW:
 		case Token.T_NOT:
+		case Token.T_EQUAL:
 		case Token.T_ASSIGN: {
 			parent_while: while (cstack.size() > 0) {
 				Token s = cstack.last();
@@ -684,6 +685,7 @@ public class Parser {
 				case Token.T_MOD:
 				case Token.T_POW:
 				case Token.T_NOT:
+				case Token.T_EQUAL:
 				case Token.T_ASSIGN: {
 					int p1 = preced(t);
 					int p2 = preced(s);
@@ -769,20 +771,22 @@ public class Parser {
 		case Token.T_NOT:
 		case Token.T_UNARY_PLUS:
 		case Token.T_UNARY_MINUS:
-			return 5;
+			return 6;
 
 		case Token.T_POW:
-			return 4;
+			return 5;
 
 		case Token.T_TIMES:
 		case Token.T_DIV:
 		case Token.T_MOD:
-			return 3;
+			return 4;
 
 		case Token.T_PLUS:
 		case Token.T_MINUS:
-			return 2;
+			return 3;
 
+		case Token.T_EQUAL:
+			return 2;
 		case Token.T_ASSIGN:
 			return 1;
 		}

@@ -52,7 +52,8 @@ public class Token
 		T_NOT          = 137, // ! als vorzeichen
 		T_SEMI         = 138, // ;
 		T_COMMA        = 139, // ,
-		T_ASSIGN       = 140; // =
+		T_ASSIGN       = 140, // =
+		T_EQUAL        = 141; // ==
 	
 	public short type;
 }
