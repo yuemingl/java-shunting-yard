@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 public class Scanner {
-	public static final String RE_PATTERN = "^([\\+\\-\\*\\/%\\^\\=]=|[\"'!,\\+\\-\\*\\/\\^%\\(\\)=;]|0x[a-fA-f0-9]+|0b[10]+|\\d*\\.\\d+|\\d+\\.\\d*|\\d+|[a-z_A-Zπ]+[a-z_A-Z0-9.]*|[ \\t]+).*",
+	public static final String RE_PATTERN = "^([\\+\\-\\*\\/%\\^\\=]=|[\"'!,\\+\\-\\*\\/\\^%\\(\\)=;:\\[\\]]|0x[a-fA-f0-9]+|0b[10]+|\\d*\\.\\d+|\\d+\\.\\d*|\\d+|[a-z_A-Zπ]+[a-z_A-Z0-9.]*|[ \\t]+).*",
 			RE_DECIMAL = "^\\d*\\.\\d+|\\d+\\.\\d*|\\d+$",
 			RE_BINARY = "^0b[10]+$",
 			RE_HEX = "^0x[a-fA-f0-9]+$",
@@ -42,8 +42,9 @@ public class Scanner {
 
 	public Scanner(String term) throws SyntaxError {
 		// support [1,2,3] or [[1,2],3,4]
-		term = term.replaceAll("\\[", "array(").replaceAll("\\]", ")");
-		// System.out.println(term);
+		//term = term.replaceAll("\\[", "array(").replaceAll("\\]", ")");
+		term = term.replaceAll("#.*", "");
+		//System.out.println(term);
 
 		tokens = new TokenStack();
 
@@ -51,7 +52,7 @@ public class Scanner {
 				.compile(RE_DECIMAL), re_binary = Pattern.compile(RE_BINARY), re_hex = Pattern
 				.compile(RE_HEX), re_ident = Pattern.compile(RE_IDENT);
 
-		// dummy
+		// dummyd
 		Token prev = new Token();
 		prev.type = Token.T_OPERATOR;
 
@@ -163,6 +164,12 @@ public class Scanner {
 			case '"':
 			case '\'': {
 				char t = token.charAt(0);
+				
+				if(t=='\'' && (prev.type == Token.T_IDENT || prev.type == Token.T_PCLOSE || prev.type == Token.T_NUMBER || prev.type == Token.T_TRANS)) {
+					type = Token.T_TRANS;
+					break;
+				}
+				
 				StringBuilder s = new StringBuilder();
 				int l = term.length();
 				boolean e = false;
@@ -209,9 +216,14 @@ public class Scanner {
 					s.append(c);
 				}
 
-				if (e == false)
+				if (e == false) {
+					if(prev.type == Token.T_IDENT || prev.type == Token.T_PCLOSE || prev.type == Token.T_NUMBER) {
+						type = Token.T_TRANS;
+						break;
+					}
 					throw new SyntaxError(
 							"fehlendes anführungszeichen am ende einer string-sequenz");
+				}
 
 				term = term.substring(s.length() + 1);
 				tokens.push(prev = new Ident(s.toString(), Token.T_STRING));
@@ -249,6 +261,16 @@ public class Scanner {
 				type = Token.T_POW;
 				break;
 
+			case '[': 
+				type = Token.T_POPEN;
+				if(prev.type == Token.T_IDENT) {
+					prev.type = Token.T_FUNCTION;
+					break;
+				} else {
+					//insert array for [1,2,3]
+					this.tokens.push(prev = new Ident("array", Token.T_FUNCTION));
+				}
+				break;
 			case '(': {
 				type = Token.T_POPEN;
 
@@ -262,10 +284,10 @@ public class Scanner {
 					this.tokens.push(new Operator("*", Token.T_TIMES));
 					break;
 				}
-
 				break;
 			}
 
+			case ']':
 			case ')':
 				type = Token.T_PCLOSE;
 				break;
@@ -276,6 +298,10 @@ public class Scanner {
 
 			case ';':
 				type = Token.T_SEMI;
+				break;
+				
+			case ':':
+				type = Token.T_COLON;
 				break;
 
 			case '=':

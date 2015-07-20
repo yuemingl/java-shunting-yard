@@ -43,7 +43,7 @@ public class Token
 		T_OPERATOR     = 128, // operator
 		T_PLUS         = 129, // +
 		T_MINUS        = 130, // -
-		T_TIMES        = 131, // * 
+		T_TIMES        = 131, // *
 		T_DIV          = 132, // /
 		T_MOD          = 133, // %
 		T_POW          = 134, // ^
@@ -53,7 +53,9 @@ public class Token
 		T_SEMI         = 138, // ;
 		T_COMMA        = 139, // ,
 		T_ASSIGN       = 140, // =
-		T_EQUAL        = 141; // ==
-	
+		T_EQUAL        = 141, // ==
+		T_TRANS        = 142, // '
+		T_COLON        = 143; // :
+		
 	public short type;
 }
