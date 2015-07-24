@@ -60,14 +60,15 @@ public class Scanner {
 			Matcher match = re_pattern.matcher(term);
 
 			if (!match.matches()) {
-				// syntax fehler (unmatched token)
-
-				int e = term.length();
-				if (e > 10)
-					e = 10;
-
-				throw new SyntaxError("einlese fehler in der nähe von `"
-						+ term.substring(0, e) + "`");
+//				// syntax fehler (unmatched token)
+//
+//				int e = term.length();
+//				if (e > 10)
+//					e = 10;
+//
+//				throw new SyntaxError("einlese fehler in der nähe von `"
+//				+ term.substring(0, e) + "`");
+				throw new SyntaxError("SyntaxError at:" + term);
 			}
 
 			String token = match.group(1);
