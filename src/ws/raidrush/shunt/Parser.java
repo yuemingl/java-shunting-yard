@@ -777,9 +777,9 @@ public class Parser {
 		case Token.T_NOT:
 		case Token.T_UNARY_PLUS:
 		case Token.T_UNARY_MINUS:
-		case Token.T_COLON:
 			return 7;
 			
+		case Token.T_COLON:
 		case Token.T_TRANS:
 			return 6;
 
