@@ -36,7 +36,7 @@ public class Parser {
 	protected Stack<TokenStack> queue, stack;
 
 	public Parser(Scanner s) throws ParseError {
-		Token t;
+		Token token;
 
 		scanner = s;
 
@@ -47,22 +47,22 @@ public class Parser {
 		queue.add(new TokenStack());
 		stack.add(new TokenStack());
 
-		int idx = 0, tln = 0;
+		int idxExprGroup = 0, tln = 0;
 
 		// queue erzeugen
-		while ((t = scanner.next()) != null) {
-			if (t.type == Token.T_SEMI && tln > 0) {
+		while ((token = scanner.next()) != null) {
+			if (token.type == Token.T_SEMI && tln > 0) {
 				// When there are no more tokens to read:
 				// While there are still operator tokens in the stack:
-				while ((t = stack.get(idx).pop()) != null) {
-					if (t.type == Token.T_POPEN || t.type == Token.T_PCLOSE)
+				while ((token = stack.get(idxExprGroup).pop()) != null) {
+					if (token.type == Token.T_POPEN || token.type == Token.T_PCLOSE)
 						throw new ParseError(
 								"fehlerhafte verschachtelung von `(` und `)`");
 
-					queue.get(idx).push(t);
+					queue.get(idxExprGroup).push(token);
 				}
 
-				++idx;
+				++idxExprGroup;
 				tln = 0;
 
 				queue.add(new TokenStack());
@@ -72,17 +72,17 @@ public class Parser {
 			}
 
 			++tln;
-			handle(t, idx);
+			handle(token, idxExprGroup);
 		}
 
 		// When there are no more tokens to read:
 		// While there are still operator tokens in the stack:
-		while ((t = stack.get(idx).pop()) != null) {
-			if (t.type == Token.T_POPEN || t.type == Token.T_PCLOSE)
+		while ((token = stack.get(idxExprGroup).pop()) != null) {
+			if (token.type == Token.T_POPEN || token.type == Token.T_PCLOSE)
 				throw new ParseError(
 						"fehlerhafte verschachtelung von `(` und `)`");
 
-			queue.get(idx).push(t);
+			queue.get(idxExprGroup).push(token);
 		}
 
 		// clear stack
@@ -819,7 +819,7 @@ public class Parser {
 		return new Parser(new Scanner(term)).opcode();
 	}
 
-	public Stack<TokenStack> getTokenStacks() {
+	public Stack<TokenStack> getTokenQueues() {
 		return this.queue;
 	}
 }
