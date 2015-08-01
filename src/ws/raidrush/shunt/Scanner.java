@@ -265,10 +265,10 @@ public class Scanner {
 			case '[': 
 				type = Token.T_POPEN;
 				if(prev.type == Token.T_IDENT) {
-					prev.type = Token.T_FUNCTION;
+					prev.type = Token.T_FUNCTION; //mimic function call "a[1,2,3]" for array access
 					break;
 				} else {
-					//insert array for [1,2,3]
+					//insert array for "[1,2,3]"
 					this.tokens.push(prev = new Ident("array", Token.T_FUNCTION));
 				}
 				break;

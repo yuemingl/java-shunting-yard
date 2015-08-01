@@ -57,6 +57,10 @@ public class TokenStack
 		return this.stack.firstElement();
 	}
 	
+	/**
+	 * Peek the top of the stack
+	 * @return
+	 */
 	public Token last()
 	{
 		if (this.stack.size() == 0)
@@ -65,6 +69,10 @@ public class TokenStack
 		return this.stack.lastElement();
 	}
 	
+	/**
+	 * Get next element but not move the pointer like next()
+	 * @return
+	 */
 	public Token peek()
 	{
 		if (this.idx + 1 >= this.stack.size())
@@ -73,6 +81,10 @@ public class TokenStack
 		return this.stack.get(this.idx + 1);
 	}
 	
+	/**
+	 * As a FIFO queue, go through all the elements
+	 * @return
+	 */
 	public Token next()
 	{
 		if (this.idx + 1 >= this.stack.size())
@@ -81,12 +93,20 @@ public class TokenStack
 		return this.stack.get(++this.idx);
 	}
 	
+	/**
+	 * Reverse next()
+	 * @return
+	 */
 	public Token prev()
 	{
 		if (this.idx - 1 < 0)
 			return null;
 		
 		return this.stack.get(--this.idx);
+	}
+	
+	public void reset() {
+		idx = -1;
 	}
 	
 	public int push(Token value)

@@ -32,6 +32,7 @@ public class Ident extends Token
 {
 	public String value;
 	public int argc = 0;
+	public int argc2 = 0; //add for [1,2;3,4]
 	
 	public Ident(String value, short type)
 	{

@@ -52,23 +52,34 @@ public class Parser {
 		// queue erzeugen
 		while ((token = scanner.next()) != null) {
 			if (token.type == Token.T_SEMI && tln > 0) {
-				// When there are no more tokens to read:
-				// While there are still operator tokens in the stack:
-				while ((token = stack.get(idxExprGroup).pop()) != null) {
-					if (token.type == Token.T_POPEN || token.type == Token.T_PCLOSE)
-						throw new ParseError(
-								"fehlerhafte verschachtelung von `(` und `)`");
-
-					queue.get(idxExprGroup).push(token);
+				TokenStack ts = stack.get(idxExprGroup);
+				
+				boolean endExpr = true;
+				while( (token = ts.next())!= null ) {
+					if(token.type == Token.T_POPEN) // e.g. [1,2;3,4]
+						endExpr = false;
 				}
-
-				++idxExprGroup;
-				tln = 0;
-
-				queue.add(new TokenStack());
-				stack.add(new TokenStack());
-
-				continue;
+				ts.reset();
+				
+				if(endExpr) {
+					// When there are no more tokens to read:
+					// While there are still operator tokens in the stack:
+					while ((token = ts.pop()) != null) {
+						if (token.type == Token.T_POPEN || token.type == Token.T_PCLOSE)
+							throw new ParseError(
+									"fehlerhafte verschachtelung von `(` und `)`");
+	
+						queue.get(idxExprGroup).push(token);
+					}
+	
+					++idxExprGroup;
+					tln = 0;
+	
+					queue.add(new TokenStack());
+					stack.add(new TokenStack());
+	
+					continue;
+				}
 			}
 
 			++tln;
@@ -580,6 +591,7 @@ public class Parser {
 		handle(scanner.next(), idx); // '('
 
 		int argc = 0;
+		int argc2 = 0;
 		Token next = scanner.peek();
 
 		if (next != null && next.type != Token.T_PCLOSE) {
@@ -596,54 +608,59 @@ public class Parser {
 
 				if (next.type == Token.T_COMMA)
 					++argc;
+				if (next.type == Token.T_SEMI) {
+					++argc; ++argc2;
+				}
 			}
 		}
 
 		((Ident) fn).argc = argc;
+		((Ident) fn).argc2 = argc2;
 	}
 
-	protected void handle(Token t, int idx) throws ParseError {
+	protected void handle(Token token, int idx) throws ParseError {
+		// Get current stack and queue by idx
 		TokenStack cstack = stack.get(idx), cqueue = queue.get(idx);
 
-		switch (t.type) {
+		switch (token.type) {
 		case Token.T_NUMBER:
 		case Token.T_IDENT:
 		case Token.T_RIDENT:
 		case Token.T_STRING:
 			// If the token is a number (identifier), then add it to the output
 			// queue.
-			cqueue.push(t);
+			cqueue.push(token);
 			break;
 
 		case Token.T_FUNCTION:
 			// If the token is a function token, then push it onto the stack.
-			cstack.push(t);
-			fargs(t, idx);
+			cstack.push(token);
+			fargs(token, idx);
 			break;
 
+		case Token.T_SEMI:
 		case Token.T_COMMA: {
 			// If the token is a function argument separator (e.g., a comma):
 
 			boolean pe = false;
 
-			while ((t = cstack.last()) != null) {
-				if (t.type == Token.T_POPEN) {
+			//'token' is the element at the top of the stack
+			while ((token = cstack.last()) != null) {
+				if (token.type == Token.T_POPEN) {
 					pe = true;
 					break;
 				}
 
-				// Until the token at the top of the stack is a left
-				// parenthesis,
-				// pop operators off the stack onto the output queue.
-				cqueue.push(cstack.pop());
+				// Until the token at the top of the stack is a left parenthesis,
+				// pop all operators off the stack onto the output queue.
+				cqueue.push(cstack.pop()); //pop the top element from the stack
 			}
 
 			// If no left parentheses are encountered, either the separator was
-			// misplaced
-			// or parentheses were mismatched.
+			// misplaced or parentheses were mismatched.
 			if (pe != true)
 				throw new ParseError(
-						"vermisster token `(` oder fehlplazierter token `,`");
+						"missing token '(' or misplaced token ','");
 
 			break;
 		}
@@ -691,10 +708,10 @@ public class Parser {
 				case Token.T_TRANS:
 				case Token.T_COLON:
 				case Token.T_ASSIGN: {
-					int p1 = preced(t);
+					int p1 = preced(token);
 					int p2 = preced(s);
 
-					if (!((assoc(t) == 1 && (p1 <= p2)) || (p1 < p2)))
+					if (!((assoc(token) == 1 && (p1 <= p2)) || (p1 < p2)))
 						break parent_while;
 
 					// Pop o2 off the stack, onto the output queue;
@@ -704,13 +721,13 @@ public class Parser {
 			}
 
 			// push op1 onto the stack.
-			cstack.push(t);
+			cstack.push(token);
 			break;
 		}
 
 		case Token.T_POPEN:
 			// If the token is a left parenthesis, then push it onto the stack.
-			cstack.push(t);
+			cstack.push(token);
 			break;
 
 		// If the token is a right parenthesis:
@@ -719,15 +736,15 @@ public class Parser {
 
 			// Until the token at the top of the stack is a left parenthesis,
 			// pop operators off the stack onto the output queue
-			while ((t = cstack.pop()) != null) {
-				if (t.type == Token.T_POPEN) {
+			while ((token = cstack.pop()) != null) {
+				if (token.type == Token.T_POPEN) {
 					// Pop the left parenthesis from the stack, but not onto the
 					// output queue.
 					pe = true;
 					break;
 				}
 
-				cqueue.push(t);
+				cqueue.push(token);
 			}
 
 			// If the stack runs out without finding a left parenthesis, then
@@ -744,7 +761,7 @@ public class Parser {
 		}
 
 		default:
-			throw new ParseError("unbekannter token #" + t.type);
+			throw new ParseError("unbekannter token #" + token.type);
 		}
 	}
 
