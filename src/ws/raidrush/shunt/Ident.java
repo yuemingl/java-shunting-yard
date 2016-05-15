@@ -31,8 +31,13 @@ package ws.raidrush.shunt;
 public class Ident extends Token
 {
 	public String value;
+	
+	//Total number of arguments
 	public int argc = 0;
-	public int argc2 = 0; //add for [1,2;3,4]
+	
+	//Two dimensional array
+	//For example: [1,2; 3,4; 5,6] argc=6, argc2=2
+	public int argc2 = 0;
 	
 	public Ident(String value, short type)
 	{
@@ -41,6 +46,6 @@ public class Ident extends Token
 	}
 	
 	public String toString() {
-		return value;
+		return value+":"+getTypeString();
 	}
 }

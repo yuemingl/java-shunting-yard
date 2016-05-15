@@ -1,5 +1,9 @@
 package ws.raidrush.shunt;
 
+/**
+ * Raidrush Symbol
+ * All tokens and operations will be converted to RSymbol
+ */
 public class RSymbol
 {
   public static final short

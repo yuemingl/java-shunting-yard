@@ -31,28 +31,36 @@ package ws.raidrush.shunt;
 import java.util.Stack;
 import java.util.Vector;
 
+/**
+ * Parse tokens using Shunting-yard method
+ *
+ */
 public class Parser {
 	protected Scanner scanner;
-	protected Stack<TokenStack> queue, stack;
+	protected Stack<TokenStack> queues, stacks;
+	protected Stack<Context> localCtxStk;
 
 	public Parser(Scanner s) throws ParseError {
 		Token token;
 
-		scanner = s;
+		this.scanner = s;
 
 		// alloc
-		queue = new Stack<TokenStack>();
-		stack = new Stack<TokenStack>();
+		this.queues = new Stack<TokenStack>();
+		this.stacks = new Stack<TokenStack>();
+		
+		this.localCtxStk = new Stack<Context>();
+		this.localCtxStk.push(new Context());
 
-		queue.add(new TokenStack());
-		stack.add(new TokenStack());
+		this.queues.add(new TokenStack());
+		this.stacks.add(new TokenStack());
 
 		int idxExprGroup = 0, tln = 0;
 
 		// queue erzeugen
 		while ((token = scanner.next()) != null) {
 			if (token.type == Token.T_SEMI && tln > 0) {
-				TokenStack ts = stack.get(idxExprGroup);
+				TokenStack ts = stacks.get(idxExprGroup);
 				
 				boolean endExpr = true;
 				while( (token = ts.next())!= null ) {
@@ -69,14 +77,14 @@ public class Parser {
 							throw new ParseError(
 									"fehlerhafte verschachtelung von `(` und `)`");
 	
-						queue.get(idxExprGroup).push(token);
+						queues.get(idxExprGroup).push(token);
 					}
 	
 					++idxExprGroup;
 					tln = 0;
 	
-					queue.add(new TokenStack());
-					stack.add(new TokenStack());
+					queues.add(new TokenStack());
+					stacks.add(new TokenStack());
 	
 					continue;
 				}
@@ -88,23 +96,23 @@ public class Parser {
 
 		// When there are no more tokens to read:
 		// While there are still operator tokens in the stack:
-		while ((token = stack.get(idxExprGroup).pop()) != null) {
+		while ((token = stacks.get(idxExprGroup).pop()) != null) {
 			if (token.type == Token.T_POPEN || token.type == Token.T_PCLOSE)
 				throw new ParseError(
 						"fehlerhafte verschachtelung von `(` und `)`");
 
-			queue.get(idxExprGroup).push(token);
+			queues.get(idxExprGroup).push(token);
 		}
 
 		// clear stack
-		stack.clear();
+		stacks.clear();
 	}
 
 	public String opcode() throws RuntimeError {
 		StringBuilder opcode = new StringBuilder();
 		int sidx = 0;
 
-		for (TokenStack ts : queue) {
+		for (TokenStack ts : queues) {
 			if (ts.size() == 0)
 				continue;
 
@@ -299,7 +307,7 @@ public class Parser {
 		}
 
 		// clear queue
-		queue.clear();
+		queues.clear();
 
 		return opcode.toString();
 	}
@@ -309,10 +317,11 @@ public class Parser {
 				.append(str.replace("\"", "\\\"")).append("\"").toString();
 	}
 
+	//evaluate the expr
 	public RSymbol reduce(Context ctx) throws RuntimeError {
 		RSymbol res = null;
 
-		for (TokenStack ts : queue) {
+		for (TokenStack ts : queues) {
 			if (ts.size() == 0)
 				continue;
 
@@ -348,8 +357,7 @@ public class Parser {
 						}
 
 						if (sym.readonly == true)
-							throw new RuntimeError("symbol \"" + name
-									+ "\" kann nicht �berschrieben werden");
+							throw new RuntimeError("symbol \"" + name + "\"can not be overwritten");
 
 						break;
 
@@ -398,7 +406,6 @@ public class Parser {
 					stack.push(doOp(t.type, lhs, rhs));
 					break;
 				}
-
 				case Token.T_FUNCTION: {
 					int argc = ((Ident) t).argc;
 					RSymbol[] argv = new RSymbol[argc];
@@ -429,7 +436,7 @@ public class Parser {
 		}
 
 		// clear queue
-		queue.clear();
+		queues.clear();
 
 		return res;
 	}
@@ -586,7 +593,7 @@ public class Parser {
 	}
 
 	protected void fargs(Token fn, int idx) throws ParseError {
-		TokenStack cstack = stack.get(idx), cqueue = queue.get(idx);
+		TokenStack cstack = stacks.get(idx), cqueue = queues.get(idx);
 		
 		handle(scanner.next(), idx); // '('
 
@@ -603,6 +610,7 @@ public class Parser {
 //lym bufgix for case: fun1(x,(y+z)*x)
 				if (next.type == Token.T_PCLOSE && cstack.last().type == Token.T_FUNCTION) {
 					cqueue.push(cstack.pop()); //pop function name and put it in the queue
+					this.localCtxStk.pop();
 					break;
 				}
 
@@ -620,7 +628,7 @@ public class Parser {
 
 	protected void handle(Token token, int idx) throws ParseError {
 		// Get current stack and queue by idx
-		TokenStack cstack = stack.get(idx), cqueue = queue.get(idx);
+		TokenStack cstack = stacks.get(idx), cqueue = queues.get(idx);
 
 		switch (token.type) {
 		case Token.T_NUMBER:
@@ -629,12 +637,22 @@ public class Parser {
 		case Token.T_STRING:
 			// If the token is a number (identifier), then add it to the output
 			// queue.
+			if(token.type == Token.T_RIDENT) {
+				Ident id = (Ident)token;
+				this.localCtxStk.peek().setSymbol(id.value, new RSymbol(id.value, true));
+			}
 			cqueue.push(token);
 			break;
-
+		//See class Scanner: If an identity is followed by '(' the identity is a function
 		case Token.T_FUNCTION:
 			// If the token is a function token, then push it onto the stack.
 			cstack.push(token);
+			// Add a token to queue to mark the beginning of a function
+			Marker fBegin = new Marker(Token.T_POPEN, token);
+			this.localCtxStk.push(fBegin.ctx);
+			
+			cqueue.push(fBegin);
+			
 			fargs(token, idx);
 			break;
 
@@ -682,14 +700,14 @@ public class Parser {
 			parent_while: while (cstack.size() > 0) {
 				Token s = cstack.last();
 
-				// While there is an operator token, o2, at the top of the stack
+				// While there is an operator token, op2, at the top of the stack
 				// op1 is left-associative and its precedence is less than or
 				// equal to that of op2,
 				// or op1 has precedence less than that of op2,
 				// Let + and ^ be right associative.
 				// Correct transformation from 1^2+3 is 12^3+
 				// The differing operator priority decides pop / push
-				// If 2 operators have equal priority then associativity
+				// If two operators have equal priority then associativity
 				// decides.
 				switch (s.type) {
 				default:
@@ -716,6 +734,7 @@ public class Parser {
 
 					// Pop o2 off the stack, onto the output queue;
 					cqueue.push(cstack.pop());
+					
 				}
 				}
 			}
@@ -837,6 +856,6 @@ public class Parser {
 	}
 
 	public Stack<TokenStack> getTokenQueues() {
-		return this.queue;
+		return this.queues;
 	}
 }

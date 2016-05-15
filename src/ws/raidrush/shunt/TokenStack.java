@@ -49,6 +49,10 @@ public class TokenStack
 		return this.stack.size();
 	}
 	
+	/**
+	 * Peek the bottom element of the stack
+	 * @return
+	 */
 	public Token first()
 	{
 		if (this.stack.size() == 0)
@@ -58,7 +62,7 @@ public class TokenStack
 	}
 	
 	/**
-	 * Peek the top of the stack
+	 * Peek the top element of the stack
 	 * @return
 	 */
 	public Token last()
@@ -135,5 +139,9 @@ public class TokenStack
 			return null;
 		
 		return this.stack.remove(0);
+	}
+	
+	public String toString() {
+		return this.stack.toString();
 	}
 }

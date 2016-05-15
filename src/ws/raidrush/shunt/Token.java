@@ -36,7 +36,7 @@ public class Token
 		T_FUNCTION     = 3,   // funktion
 		T_POPEN        = 4,   // (
 		T_PCLOSE       = 5,   // )
-		T_RIDENT       = 8,   // ident vor = (R -> right)
+		T_RIDENT       = 8,   // ident vor = (R -> right) //lym identity that is to be assigned a value
 		T_STRING       = 9,   // string
 //		T_BOPEN        = 10,  // [
 //		T_BCLOSE       = 11,  // ]
@@ -58,4 +58,35 @@ public class Token
 		T_COLON        = 143; // :
 		
 	public short type;
+	
+	public String getTypeString() {
+		switch(type) {
+		case T_NUMBER     : return "T_NUMBER";
+		case T_IDENT      : return "T_IDENT";
+		case T_FUNCTION   : return "T_FUNCTION";
+		case T_POPEN      : return "T_POPEN";
+		case T_PCLOSE     : return "T_PCLOSE";
+		case T_RIDENT     : return "T_RIDENT";
+		case T_STRING     : return "T_STRING";
+//		case T_BOPEN      : return "T_BOPEN";
+//		case T_BCLOSE     : return "T_BCLOSE";
+		case T_OPERATOR   : return "T_OPERATOR";
+		case T_PLUS       : return "T_PLUS";
+		case T_MINUS      : return "T_MINUS";
+		case T_TIMES      : return "T_TIMES";
+		case T_DIV        : return "T_DIV";
+		case T_MOD        : return "T_MOD";
+		case T_POW        : return "T_POW";
+		case T_UNARY_PLUS : return "T_UNARY_PLUS";
+		case T_UNARY_MINUS: return "T_UNARY_MINUS";
+		case T_NOT        : return "T_NOT";
+		case T_SEMI       : return "T_SEMI";
+		case T_COMMA      : return "T_COMMA";
+		case T_ASSIGN     : return "T_ASSIGN";
+		case T_EQUAL      : return "T_EQUAL";
+		case T_TRANS      : return "T_TRANS";
+		case T_COLON      : return "T_COLON";
+		default: return "";
+		}
+	}
 }

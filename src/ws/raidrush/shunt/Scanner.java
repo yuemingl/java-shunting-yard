@@ -31,6 +31,10 @@ package ws.raidrush.shunt;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+/**
+ * Scan input string to token list
+ *
+ */
 public class Scanner {
 	public static final String RE_PATTERN = "^([\\+\\-\\*\\/%\\^\\=]=|[\"'!,\\+\\-\\*\\/\\^%\\(\\)=;:\\[\\]]|0x[a-fA-f0-9]+|0b[10]+|\\d*\\.\\d+|\\d+\\.\\d*|\\d+|[a-z_A-Zπ]+[a-z_A-Z0-9.]*|[ \\t]+).*",
 			RE_DECIMAL = "^\\d*\\.\\d+|\\d+\\.\\d*|\\d+$",
@@ -48,9 +52,11 @@ public class Scanner {
 
 		tokens = new TokenStack();
 
-		Pattern re_pattern = Pattern.compile(RE_PATTERN), re_decimal = Pattern
-				.compile(RE_DECIMAL), re_binary = Pattern.compile(RE_BINARY), re_hex = Pattern
-				.compile(RE_HEX), re_ident = Pattern.compile(RE_IDENT);
+		Pattern re_pattern = Pattern.compile(RE_PATTERN), 
+				re_decimal = Pattern.compile(RE_DECIMAL), 
+				re_binary  = Pattern.compile(RE_BINARY), 
+				re_hex     = Pattern.compile(RE_HEX), 
+				re_ident   = Pattern.compile(RE_IDENT);
 
 		// dummyd
 		Token prev = new Token();
@@ -309,7 +315,7 @@ public class Scanner {
 				if (prev.type != Token.T_IDENT)
 					throw new SyntaxError("fehledner ident vor `=`");
 
-				prev.type = Token.T_RIDENT;
+				prev.type = Token.T_RIDENT;//why?
 				type = Token.T_ASSIGN;
 				break;
 			}
@@ -358,9 +364,9 @@ public class Scanner {
 		return this.tokens.next();
 	}
 
-	public Token prev() {
-		return this.tokens.prev();
-	}
+//	public Token prev() {
+//		return this.tokens.prev();
+//	}
 
 	public Token peek() {
 		return this.tokens.peek();

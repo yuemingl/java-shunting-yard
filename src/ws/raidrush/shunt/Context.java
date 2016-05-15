@@ -33,9 +33,9 @@ import java.util.HashMap;
 
 public class Context 
 {
-	protected Map<String, Function> functionTable;
-	protected Map<String, RSymbol>   constantTable;
-	protected Map<String, RSymbol>   symbolTable;
+	public Map<String, Function> functionTable;
+	public Map<String, RSymbol>   constantTable;
+	public Map<String, RSymbol>   symbolTable;
 	
 	public Context()
 	{
